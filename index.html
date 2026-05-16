@@ -506,5 +506,12 @@ function checkPromotion(fighterIndex) {
             renderFighters();
         });
     </script>
+	<script>
+  		if ('serviceWorker' in navigator) {
+    		navigator.serviceWorker.register('sw.js')
+      		.then(reg => console.log('Service Worker registrado!'))
+      		.catch(err => console.log('Erro ao registrar:', err));
+  		}
+	</script>
 </body>
 </html>
