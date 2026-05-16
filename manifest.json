@@ -3,14 +3,21 @@
   "name": "Meu App de Judô",
   "icons": [
     {
-      "src": "https://flaticon.com",
+      "src": "icon.png",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icon.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
     }
   ],
-  "start_url": "/JudoHTML/",
-  "background_color": "#ffffff",
+  "start_url": "./index.html",
+  "background_color": "#f4f4f4",
   "display": "standalone",
-  "theme_color": "#000000"
+  "theme_color": "#007bff",
+  "orientation": "portrait"
 }
