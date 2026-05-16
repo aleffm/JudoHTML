@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Judo Progress Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        #controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #fighters {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            padding: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-align: center;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        .card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: #000;
+        }
+	.delete-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    transition: background-color 0.2s;
+}
+
+.delete-btn:hover {
+    background-color: #c82333;
+}
+        #details {
+            margin-top: 20px;
+        }
+        #details details {
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 5px;
+        }
+        #details summary {
+            font-weight: bold;
+            cursor: pointer;
+            padding: 5px;
+        }
+        #details ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+        #details li {
+            list-style: none;
+            padding: 5px 0;
+        }
+        #details input[type="checkbox"] {
+            margin-right: 8px;
+        }
+	
+        @media (max-width: 600px) {
+            #controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Fundamentos Tecnicos Aguaí</h1>
+    <div id="controls">
+        <button onclick="importData()">Importar</button>
+        <button onclick="exportData()">Exportar</button>
+        <button onclick="newFighter()">+ Novo Lutador</button>
+    </div>
+    <div id="fighters"></div>
+    <div id="modal" class="modal" onclick="if(event.target.id === 'modal') closeModal()">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()" title="Fechar">&times;</span>
+            <h2 id="modal-title"></h2>
+            <div id="details"></div>
+        </div>
+    </div>
+    <script>
+        const belts = [
+            {name: 'Branca', color: '#FFFFFF', textColor: '#000000'},
+            {name: 'Cinza', color: '#808080', textColor: '#000000'},
+            {name: 'Azul', color: '#4169E1', textColor: '#000000'},
+            {name: 'Amarela', color: '#FFD700', textColor: '#000000'},
+            {name: 'Laranja', color: '#FF8C00', textColor: '#000000'},
+            {name: 'Verde', color: '#228B22', textColor: '#FFFFFF'},
+            {name: 'Roxa', color: '#9932CC', textColor: '#FFFFFF'},
+            {name: 'Marrom', color: '#8B4513', textColor: '#FFFFFF'},
+            {name: 'Preta', color: '#000000', textColor: '#FFFFFF'}
+        ];
+        const techniques = [
+  {id:1, belt:0, type:"NAGE-WAZA", subtype:"Te-waza", name:"Uki-Otoshi"},
+  {id:2, belt:0, type:"NAGE-WAZA", subtype:"Te-waza", name:"Seoi-Nage"},
+  {id:3, belt:1, type:"NAGE-WAZA", subtype:"Te-waza", name:"Ippon-Seoi-Nage"},
+  {id:4, belt:1, type:"NAGE-WAZA", subtype:"Te-waza", name:"Tai-Otoshi"},
+  {id:5, belt:2, type:"NAGE-WAZA", subtype:"Te-waza", name:"Seoi-Otoshi"},
+  {id:6, belt:2, type:"NAGE-WAZA", subtype:"Te-waza", name:"Kata-Guruma"},
+  {id:7, belt:3, type:"NAGE-WAZA", subtype:"Te-waza", name:"Sumi-Otoshi"},
+  {id:8, belt:3, type:"NAGE-WAZA", subtype:"Te-waza", name:"Yama-Arashi"},
+  {id:9, belt:4, type:"NAGE-WAZA", subtype:"Te-waza", name:"Sukui-Nage"},
+  {id:10, belt:4, type:"NAGE-WAZA", subtype:"Te-waza", name:"Morote-Gari"},
+  {id:11, belt:5, type:"NAGE-WAZA", subtype:"Te-waza", name:"Kuchiki-Taoshi"},
+  {id:12, belt:5, type:"NAGE-WAZA", subtype:"Te-waza", name:"Obi-Otoshi"},
+  {id:13, belt:6, type:"NAGE-WAZA", subtype:"Te-waza", name:"Kibisu-Gaeshi"},
+  {id:14, belt:6, type:"NAGE-WAZA", subtype:"Te-waza", name:"Ko-Uchi-Gaeshi"},
+  {id:15, belt:7, type:"NAGE-WAZA", subtype:"Te-waza", name:"Obi-Tori-Gaeshi"},
+  {id:16, belt:7, type:"NAGE-WAZA", subtype:"Te-waza", name:"Uchi-Mata-Sukashi"},
+  {id:17, belt:0, type:"NAGE-WAZA", subtype:"Koshi-waza", name:"O-Goshi"},
+  {id:18, belt:0, type:"NAGE-WAZA", subtype:"Koshi-waza", name:"Uki-Goshi"},
+  {id:19, belt:1, type:"NAGE-WAZA", subtype:"Koshi-waza", name:"Koshi-Guruma"},
+  {id:20, belt:1, type:"NAGE-WAZA", subtype:"Koshi-waza", name:"Tsurikomi-Goshi"},
+  {id:21, belt:2, type:"NAGE-WAZA", subtype:"Koshi-waza", name:"Harai-Goshi"},
+  {id:22, belt:2, type:"NAGE-WAZA", subtype:"Koshi-waza", name:"Tsuri-Goshi"},
+  {id:23, belt:3, type:"NAGE-WAZA", subtype:"Koshi-waza", name:"Hane-Goshi"},
+  {id:24, belt:3, type:"NAGE-WAZA", subtype:"Koshi-waza", name:"Utsuri-Goshi"},
+  {id:25, belt:4, type:"NAGE-WAZA", subtype:"Koshi-waza", name:"Sode-Tsurikomi-Goshi"},
+  {id:26, belt:7, type:"NAGE-WAZA", subtype:"Koshi-waza", name:"Ushiro-Goshi"},
+  {id:27, belt:0, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"De-Ashi-Barai"},
+  {id:28, belt:0, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"O-Soto-Gari"},
+  {id:29, belt:0, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"O-Uchi-Gari"},
+  {id:30, belt:1, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"Ko-Soto-Gari"},
+  {id:31, belt:1, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"Ko-Uchi-Gari"},
+  {id:32, belt:1, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"Hiza-Guruma"},
+  {id:33, belt:2, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"Sasae-Tsurikomi-Ashi"},
+  {id:34, belt:2, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"Okuri-Ashi-Harai"},
+  {id:35, belt:3, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"Uchi-Mata"},
+  {id:36, belt:3, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"Ko-Soto-Gake"},
+  {id:37, belt:4, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"Ashi-Guruma"},
+  {id:38, belt:4, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"Harai-Tsurikomi-Ashi"},
+  {id:39, belt:5, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"O-Guruma"},
+  {id:40, belt:5, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"O-Soto-Guruma"},
+  {id:41, belt:5, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"Ko-Soto-Gake"},
+  {id:42, belt:6, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"O-Kuri-Ashi-Barai"},
+  {id:43, belt:6, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"Tsubame-Gaeshi"},
+  {id:44, belt:6, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"O-Soto-Gaeshi"},
+  {id:45, belt:7, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"Ko-Uchi-Gaeshi"},
+  {id:46, belt:7, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"O-Uchi-Gaeshi"},
+  {id:47, belt:7, type:"NAGE-WAZA", subtype:"Ashi-waza", name:"Harai-Goshi-Gaeshi"},
+  {id:48, belt:5, type:"NAGE-WAZA", subtype:"Ma-sutemi-waza", name:"Tomoe-Nage"},
+  {id:49, belt:5, type:"NAGE-WAZA", subtype:"Ma-sutemi-waza", name:"Ura-Nage"},
+  {id:50, belt:6, type:"NAGE-WAZA", subtype:"Ma-sutemi-waza", name:"Hikikomi-Gaeshi"},
+  {id:51, belt:6, type:"NAGE-WAZA", subtype:"Ma-sutemi-waza", name:"Tawara-Gaeshi"},
+  {id:52, belt:7, type:"NAGE-WAZA", subtype:"Ma-sutemi-waza", name:"Sumi-Gaeshi"},
+  {id:53, belt:5, type:"NAGE-WAZA", subtype:"Yoko-sutemi-waza", name:"Uki-Waza"},
+  {id:54, belt:5, type:"NAGE-WAZA", subtype:"Yoko-sutemi-waza", name:"Yoko-Otoshi"},
+  {id:55, belt:5, type:"NAGE-WAZA", subtype:"Yoko-sutemi-waza", name:"Yoko-Gake"},
+  {id:56, belt:5, type:"NAGE-WAZA", subtype:"Yoko-sutemi-waza", name:"Uki-Waza"},
+  {id:57, belt:5, type:"NAGE-WAZA", subtype:"Yoko-sutemi-waza", name:"Yoko-Otoshi"},
+  {id:58, belt:5, type:"NAGE-WAZA", subtype:"Yoko-sutemi-waza", name:"Yoko-Gake"},
+  {id:59, belt:5, type:"NAGE-WAZA", subtype:"Yoko-sutemi-waza", name:"Tani-Otoshi"},
+  {id:60, belt:5, type:"NAGE-WAZA", subtype:"Yoko-sutemi-waza", name:"Yoko-Wakare"},
+  {id:61, belt:6, type:"NAGE-WAZA", subtype:"Yoko-sutemi-waza", name:"Daki-Wakare"},
+  {id:62, belt:6, type:"NAGE-WAZA", subtype:"Yoko-sutemi-waza", name:"Yoko-Guruma"},
+  {id:63, belt:6, type:"NAGE-WAZA", subtype:"Yoko-sutemi-waza", name:"Ushiro-Goshi"},
+  {id:64, belt:6, type:"NAGE-WAZA", subtype:"Yoko-sutemi-waza", name:"Uchi-Maki-Komi"},
+  {id:65, belt:6, type:"NAGE-WAZA", subtype:"Yoko-sutemi-waza", name:"Harai-Maki-Komi"},
+  {id:66, belt:7, type:"NAGE-WAZA", subtype:"Yoko-sutemi-waza", name:"Soto-Maki-Komi"},
+  {id:67, belt:7, type:"NAGE-WAZA", subtype:"Yoko-sutemi-waza", name:"Hane-Maki-Komi"},
+  {id:68, belt:7, type:"NAGE-WAZA", subtype:"Yoko-sutemi-waza", name:"Ko-Uchi-Maki-Komi"},
+  {id:69, belt:7, type:"NAGE-WAZA", subtype:"Yoko-sutemi-waza", name:"Osoto-Maki-Komi"},
+  {id:70, belt:0, type:"KATAME-WAZA", subtype:"Osae-komi-waza", name:"Kesa-Gatame"},
+  {id:71, belt:0, type:"KATAME-WAZA", subtype:"Osae-komi-waza", name:"Yoko-Shiho-Gatame"},
+  {id:72, belt:1, type:"KATAME-WAZA", subtype:"Osae-komi-waza", name:"Kuzure-Kesa-Gatame"},
+  {id:73, belt:1, type:"KATAME-WAZA", subtype:"Osae-komi-waza", name:"Tate-Shiho-Gatame"},
+  {id:74, belt:2, type:"KATAME-WAZA", subtype:"Osae-komi-waza", name:"Kami-Shiho-Gatame"},
+  {id:75, belt:2, type:"KATAME-WAZA", subtype:"Osae-komi-waza", name:"Kata-Gatame"},
+  {id:76, belt:3, type:"KATAME-WAZA", subtype:"Osae-komi-waza", name:"Ushiro-Kesa-Gatame"},
+  {id:77, belt:3, type:"KATAME-WAZA", subtype:"Osae-komi-waza", name:"Kuzure-Kami-Shiho-Gatame"},
+  {id:78, belt:4, type:"KATAME-WAZA", subtype:"Osae-komi-waza", name:"Makura-Kesa-Gatame"},
+  {id:79, belt:5, type:"KATAME-WAZA", subtype:"Osae-komi-waza", name:"Uki-Gatame"},
+  {id:80, belt:6, type:"KATAME-WAZA", subtype:"Osae-komi-waza", name:"Ura-Gatame"},
+  {id:81, belt:5, type:"KATAME-WAZA", subtype:"Shime-waza", name:"Nami-Juji-Jime"},
+  {id:82, belt:5, type:"KATAME-WAZA", subtype:"Shime-waza", name:"Kata-Juji-Jime"},
+  {id:83, belt:5, type:"KATAME-WAZA", subtype:"Shime-waza", name:"Gyaku-Juji-Jime"},
+  {id:84, belt:6, type:"KATAME-WAZA", subtype:"Shime-waza", name:"Tsukomi-Jime"},
+  {id:85, belt:6, type:"KATAME-WAZA", subtype:"Shime-waza", name:"Sode-Guruma-Jime"},
+  {id:86, belt:6, type:"KATAME-WAZA", subtype:"Shime-waza", name:"Katate-Jime"},
+  {id:87, belt:6, type:"KATAME-WAZA", subtype:"Shime-waza", name:"Hadaka-Jime"},
+  {id:88, belt:7, type:"KATAME-WAZA", subtype:"Shime-waza", name:"Okuri-Eri-Jime"},
+  {id:89, belt:7, type:"KATAME-WAZA", subtype:"Shime-waza", name:"Kata-Ha-Jime"},
+  {id:90, belt:7, type:"KATAME-WAZA", subtype:"Shime-waza", name:"Yoko-Sankaku-Jime"},
+  {id:91, belt:7, type:"KATAME-WAZA", subtype:"Shime-waza", name:"Ushiro-Sankaku-Jime"},
+  {id:92, belt:7, type:"KATAME-WAZA", subtype:"Shime-waza", name:"Mae-Sankaku-Jime"},
+  {id:93, belt:7, type:"KATAME-WAZA", subtype:"Shime-waza", name:"Ryote-Jime"},
+  {id:95, belt:5, type:"KATAME-WAZA", subtype:"Kansetsu-waza", name:"Ude-Garami"},
+  {id:96, belt:5, type:"KATAME-WAZA", subtype:"Kansetsu-waza", name:"Ude-Hishigi-Juji-Gatame"},
+  {id:97, belt:6, type:"KATAME-WAZA", subtype:"Kansetsu-waza", name:"Ude-Hishigi-Ude-Gatame"},
+  {id:98, belt:6, type:"KATAME-WAZA", subtype:"Kansetsu-waza", name:"Ude-Hishigi-Hiza-Gatame"},
+  {id:99, belt:6, type:"KATAME-WAZA", subtype:"Kansetsu-waza", name:"Ude-Hishigi-Waki-Gatame"},
+  {id:100, belt:7, type:"KATAME-WAZA", subtype:"Kansetsu-waza", name:"Ude-Hishigi-Hara-Gatame"},
+  {id:101, belt:7, type:"KATAME-WAZA", subtype:"Kansetsu-waza", name:"Ude-Hishigi-Ashi-Gatame"},
+  {id:102, belt:7, type:"KATAME-WAZA", subtype:"Kansetsu-waza", name:"Ude-Hishigi-Te-Gatame"},
+  {id:103, belt:7, type:"KATAME-WAZA", subtype:"Kansetsu-waza", name:"Ude-Hishigi-Sankaku-Gatame"},
+  {id:104, belt:2, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"O-Uchi-Gari > Ko-Uchi-Gari"},
+  {id:105, belt:2, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"De-Ashi-Barai > O-Soto-Gari"},
+  {id:106, belt:2, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Ko-Uchi-Gari > Seoi-Nage"},
+  {id:107, belt:3, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"O-Soto-Gari > O-Uchi-Gari"},
+  {id:108, belt:3, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"O-Soto-Gari > Ko-Uchi-Gari"},
+  {id:109, belt:3, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Ko-Uchi-Gari > O-Soto-Gari"},
+  {id:110, belt:3, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Seoi-Nage > O-Uchi-Gari"},
+  {id:111, belt:3, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"O-Soto-Gari > O-Uchi-Gari"},
+  {id:112, belt:3, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Hiza-Guruma > Tai-Otoshi"},
+  {id:113, belt:3, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Uchi-Mata > Ko-Uchi-Gari"},
+  {id:114, belt:3, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Seoi-Nage > O-Soto-Gari"},
+  {id:115, belt:3, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Ko-Soto-Gake > Tai-Otoshi"},
+  {id:116, belt:3, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"O-Uchi-Gari > Uchi-Mata"},
+  {id:117, belt:3, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Sasae-Tsurikomi-Ashi > Seoi-Nage"},
+  {id:118, belt:3, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"O-Goshi > Ko-Uchi-Gari"},
+  {id:119, belt:3, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Okuri-Ashi-Harai > Tai-Otoshi"},
+  {id:120, belt:3, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"De-Ashi-Barai > Seoi-Otoshi"},
+  {id:121, belt:4, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Harai-Goshi > O-Uchi-Gari"},
+  {id:122, belt:4, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Ashi-Guruma > Ko-Uchi-Gari"},
+  {id:123, belt:4, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Morote-Gari > Kata-Guruma"},
+  {id:124, belt:4, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Sukui-Nage > O-Soto-Gari"},
+  {id:125, belt:4, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Harai-Tsurikomi-Ashi > Seoi-Nage"},
+  {id:126, belt:4, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Uchi-Mata > Tai-Otoshi"},
+  {id:127, belt:4, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Ko-Soto-Gari > Harai-Goshi"},
+  {id:128, belt:4, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"O-Soto-Gari > Seoi-Otoshi"},
+  {id:129, belt:5, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Kuchiki-Taoshi > Ko-Uchi-Gari"},
+  {id:130, belt:5, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Obi-Otoshi > O-Soto-Gari"},
+  {id:131, belt:5, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Tomoe-Nage > Juji-Gatame"},
+  {id:132, belt:5, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Sumi-Gaeshi > Tate-Shiho-Gatame"},
+  {id:133, belt:5, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Yoko-Otoshi > Kami-Shiho-Gatame"},
+  {id:134, belt:5, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Tani-Otoshi > Kesa-Gatame"},
+  {id:135, belt:5, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Uki-Waza > Kata-Gatame"},
+  {id:136, belt:6, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Kibisu-Gaeshi > Seoi-Nage"},
+  {id:137, belt:6, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Ko-Uchi-Gaeshi > Tai-Otoshi"},
+  {id:138, belt:6, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Hikikomi-Gaeshi > Juji-Gatame"},
+  {id:139, belt:6, type:"RENRAKU-HENKA-WAZA", subtype:"Renraku-henka-waza", name:"Tawara-Gaeshi > Ude-Garami"},
+  {id:140, belt:2, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"O-Soto-Gari > O-Soto-Gaeshi"},
+  {id:141, belt:2, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"Ko-Uchi-Gari > Ko-Uchi-Gaeshi"},
+  {id:142, belt:2, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"De-Ashi-Barai > Tsubame-Gaeshi"},
+  {id:143, belt:3, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"O-Uchi-Gari > O-Uchi-Gaeshi"},
+  {id:144, belt:3, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"Harai-Goshi > Harai-Goshi-Gaeshi"},
+  {id:145, belt:3, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"Uchi-Mata > Uchi-Mata-Sukashi"},
+  {id:146, belt:3, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"Ko-Soto-Gake > Tani-Otoshi"},
+  {id:147, belt:3, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"Tai-Otoshi > Yoko-Otoshi"},
+  {id:148, belt:3, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"Seoi-Nage > Ura-Nage"},
+  {id:149, belt:3, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"De-Ashi-Barai > Ko-Soto-Gari"},
+  {id:150, belt:3, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"Harai-Goshi > Yoko-Otoshi"},
+  {id:151, belt:3, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"O-Goshi > Ushiro-Goshi"},
+  {id:152, belt:4, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"O-Soto-Gari > Ura-Nage"},
+  {id:153, belt:4, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"Harai-Goshi > Yoko-Guruma"},
+  {id:154, belt:4, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"Uchi-Mata > Tani-Otoshi"},
+  {id:155, belt:4, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"Morote-Gari > Sukui-Nage"},
+  {id:156, belt:4, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"O-Goshi > Ushiro-Goshi"},
+  {id:157, belt:5, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"Tomoe-Nage > Hikikomi-Gaeshi"},
+  {id:158, belt:5, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"Morote-Gari > Tawara-Gaeshi"},
+  {id:159, belt:5, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"O-Soto-Gari > Sumi-Gaeshi"},
+  {id:160, belt:6, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"Harai-Goshi > Yoko-Wakare"},
+  {id:161, belt:6, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"Uchi-Mata > Obi-Tori-Gaeshi"},
+  {id:162, belt:6, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"Kata-Guruma > Kibisu-Gaeshi"},
+  {id:163, belt:7, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"O-Soto-Gari > Te-Guruma"},
+  {id:164, belt:7, type:"KAESHI-WAZA", subtype:"Kaeshi-waza", name:"Uchi-Mata > Uchi-Mata-Gaeshi"}
+];
+        let fighters = [];
+        function saveData() {
+            localStorage.setItem('judoFighters', JSON.stringify(fighters));
+            renderFighters();
+        }
+        function renderFighters() {
+    const container = document.getElementById('fighters');
+    container.innerHTML = '';
+    if (fighters.length === 0) {
+        container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #666;">Nenhum lutador. Adicione um novo!</p>';
+        return;
+    }
+    fighters.forEach((f, index) => {
+        const belt = belts[f.beltIndex || 0];
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.backgroundColor = belt.color;
+        card.style.color = belt.textColor;
+        card.style.position = 'relative';
+        card.innerHTML = `
+            <h3>${f.name}</h3>
+            <p>Faixa: ${belt.name}</p>
+            <p>Aprendidos: ${f.learned ? f.learned.length : 0}/${techniques.length}</p>
+            <button class="delete-btn" onclick="deleteFighter(${index})">🗑️</button>
+        `;
+        card.style.cursor = 'pointer';
+        card.onclick = (e) => {
+            if (e.target.className !== 'delete-btn') {
+                openModal(index);
+            }
+        };
+        container.appendChild(card);
+    });
+}
+
+function deleteFighter(index) {
+    if (confirm('Tem certeza que deseja deletar este lutador?')) {
+        fighters.splice(index, 1);
+        localStorage.setItem('judoFighters', JSON.stringify(fighters));
+        renderFighters();
+    }
+}
+        function openModal(fighterIndex) {
+            const fighter = fighters[fighterIndex];
+            document.getElementById('modal-title').textContent = fighter.name;
+            const learnedSet = new Set(fighter.learned || []);
+            const grouped = {};
+            techniques.forEach(t => {
+                if (!grouped[t.belt]) grouped[t.belt] = {};
+                if (!grouped[t.belt][t.type]) grouped[t.belt][t.type] = {};
+                if (!grouped[t.belt][t.type][t.subtype]) grouped[t.belt][t.type][t.subtype] = [];
+                grouped[t.belt][t.type][t.subtype].push(t);
+            });
+            let html = '';
+            for (let b = 0; b < belts.length; b++) {
+                if (grouped[b]) {
+                    html += `<details><summary>${belts[b].name}</summary>`;
+                    for (let type in grouped[b]) {
+                        html += `<details><summary>${type}</summary>`;
+                        for (let subtype in grouped[b][type]) {
+                            const subs = grouped[b][type][subtype];
+                            html += `<h4>${subtype} (${subs.length})</h4><ul>`;
+                            subs.forEach(t => {
+                                const checked = learnedSet.has(t.id) ? 'checked' : '';
+                                html += `<li><label><input type="checkbox" data-id="${t.id}" data-belt="${t.belt}" ${checked} onchange="toggleLearned(${fighterIndex}, ${t.id}, this.checked)"> ${t.name}</label></li>`;
+                            });
+                            html += '</ul>';
+                        }
+                        html += '</details>';
+                    }
+                    html += '</details>';
+                }
+            }
+            document.getElementById('details').innerHTML = html;
+            document.getElementById('modal').style.display = 'block';
+        }
+        function toggleLearned(fighterIndex, techId, isChecked) {
+    if (!fighters[fighterIndex].learned) fighters[fighterIndex].learned = [];
+    if (isChecked) {
+        if (!fighters[fighterIndex].learned.includes(techId)) {
+            fighters[fighterIndex].learned.push(techId);
+        }
+    } else {
+        fighters[fighterIndex].learned = fighters[fighterIndex].learned.filter(id => id !== techId);
+    }
+    saveData();
+    checkPromotion(fighterIndex);  // ← ADICIONE ISTO
+}
+
+function checkPromotion(fighterIndex) {
+    const fighter = fighters[fighterIndex];
+    const currentBelt = fighter.beltIndex || 0;
+    const techsOfBelt = techniques.filter(t => t.belt === currentBelt);
+    const learnedCount = fighter.learned ? fighter.learned.filter(id => 
+        techsOfBelt.some(t => t.id === id)
+    ).length : 0;
+    
+    if (learnedCount === techsOfBelt.length && techsOfBelt.length > 0) {
+        fighter.beltIndex = currentBelt + 1;
+        if (fighter.beltIndex >= belts.length) {
+            fighter.beltIndex = belts.length - 1;
+            alert('🎉 Parabéns! Você atingiu a Faixa Preta! Mestre completo!');
+        } else {
+            alert(`🥋 Promoção! Você subiu para Faixa ${belts[fighter.beltIndex].name}!`);
+        }
+        saveData();
+        renderFighters();
+        closeModal();
+    }
+}
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+        function newFighter() {
+            const name = prompt('Nome do lutador:');
+            if (name && name.trim()) {
+                fighters.push({name: name.trim(), beltIndex: 0, learned: []});
+                saveData();
+            }
+        }
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    try {
+                        const data = JSON.parse(ev.target.result);
+                        fighters = data.fighters || [];
+                        saveData();
+                    } catch (err) {
+                        alert('Erro ao importar JSON: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+        function exportData() {
+            const data = {fighters};
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'judo-progress.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        // Load on start
+        window.addEventListener('load', () => {
+            const saved = localStorage.getItem('judoFighters');
+            if (saved) {
+                try {
+                    fighters = JSON.parse(saved);
+                } catch (err) {
+                    fighters = [];
+                }
+            }
+            renderFighters();
+        });
+    </script>
+</body>
+</html>
