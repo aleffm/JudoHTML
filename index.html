@@ -2,14 +2,13 @@
 <html lang="pt">
 <head>
     <link rel="manifest" href="manifest.json">
-	
-	<!-- Apontando para o arquivo local dentro do seu repositório -->
-	<link rel="icon" type="image/png" sizes="512x512" href="icon.png">
-	<link rel="icon" type="image/png" sizes="192x192" href="icon.png">
-	<link rel="apple-touch-icon" href="icon.png">
-
+    <link rel="icon" type="image/png" sizes="512x512" href="icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#007bff">
+    <meta name="description" content="Judo Aguaí - Rastreador de progresso em judô com controle de técnicas e graduações">
     <title>Judo Aguaí</title>
     <style>
         :root {
@@ -298,7 +297,34 @@
             box-sizing: border-box;
         }
 
+        .edit-info-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .edit-info-container > div {
+            flex: 1;
+            min-width: 150px;
+        }
+
         @media (max-width: 600px) {
+            .edit-info-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .edit-info-container > div {
+                width: 100%;
+                min-width: auto;
+            }
+
+            #details input[type="text"],
+            #details input[type="number"] {
+                width: 100% !important;
+            }
+
             .header-container {
                 flex-direction: column;
                 gap: 10px;
@@ -350,16 +376,14 @@
         </div>
     </div>
     <script>
-        // ✅ Detecta automaticamente: GitHub Pages usa ./Faixas/
-        function getBeltImagePath(beltFileName) {
-            return `./Faixas/Faixa_${beltFileName}.svg`;
-        }
-
-        // Registrar Service Worker para PWA
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('service-worker.js')
                 .then(reg => console.log('Service Worker registrado'))
                 .catch(err => console.log('Service Worker erro:', err));
+        }
+
+        function getBeltImagePath(beltFileName) {
+            return `./Faixas/Faixa_${beltFileName}.svg`;
         }
 
         const belts = [
@@ -568,22 +592,22 @@
             const currentYear = new Date().getFullYear();
             const age = currentYear - birthYear;
             
-            if (age <= 8) return 'Sub9';
-            if (age <= 10) return 'Sub11';
-            if (age <= 12) return 'Sub13';
-            if (age <= 14) return 'Sub15';
-            if (age <= 17) return 'Cadete';
-            if (age <= 20) return 'Junior';
-            if (age <= 29) return 'Sênior';
-            if (age <= 34) return 'Master 1';
-            if (age <= 39) return 'Master 2';
-            if (age <= 44) return 'Master 3';
-            if (age <= 49) return 'Master 4';
-            if (age <= 54) return 'Master 5';
-            if (age <= 59) return 'Master 6';
-            if (age <= 64) return 'Master 7';
-            if (age <= 69) return 'Master 8';
-            if (age <= 74) return 'Master 9';
+            if (age &lt;= 8) return 'Sub9';
+            if (age &lt;= 10) return 'Sub11';
+            if (age &lt;= 12) return 'Sub13';
+            if (age &lt;= 14) return 'Sub15';
+            if (age &lt;= 17) return 'Cadete';
+            if (age &lt;= 20) return 'Junior';
+            if (age &lt;= 29) return 'Sênior';
+            if (age &lt;= 34) return 'Master 1';
+            if (age &lt;= 39) return 'Master 2';
+            if (age &lt;= 44) return 'Master 3';
+            if (age &lt;= 49) return 'Master 4';
+            if (age &lt;= 54) return 'Master 5';
+            if (age &lt;= 59) return 'Master 6';
+            if (age &lt;= 64) return 'Master 7';
+            if (age &lt;= 69) return 'Master 8';
+            if (age &lt;= 74) return 'Master 9';
             return 'Master 10';
         }
 
@@ -669,16 +693,16 @@
             let html = `
                 <div style="border: 1px solid var(--border-color); padding: 15px; margin-bottom: 20px; border-radius: 5px; background: var(--card-bg);">
                     <h4>Editar Informações</h4>
-                    <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
-                        <div style="flex: 1; min-width: 150px;">
+                    <div class="edit-info-container">
+                        <div>
                             <label>Nome:</label>
                             <input type="text" id="edit-name" value="${fighter.name}">
                         </div>
-                        <div style="flex: 1; min-width: 150px;">
+                        <div>
                             <label>Data Nasc. (DD/MM/YYYY):</label>
                             <input type="text" id="edit-birthdate" value="${fighter.birthDate}" maxlength="10" oninput="maskDate(event)">
                         </div>
-                        <div style="flex: 0.5; min-width: 80px;">
+                        <div>
                             <label>Peso (kg):</label>
                             <input type="number" id="edit-weight" value="${fighter.weight}" step="0.1">
                         </div>
@@ -688,7 +712,7 @@
             `;
 
             html += '<h4>Técnicas por Faixa</h4>';
-            for (let b = 0; b < belts.length; b++) {
+            for (let b = 0; b &lt; belts.length; b++) {
                 if (grouped[b]) {
                     html += `<details><summary>${belts[b].name}</summary>`;
                     for (let type in grouped[b]) {
@@ -727,7 +751,7 @@
                 return;
             }
             
-            if (isNaN(newWeight) || newWeight <= 0) {
+            if (isNaN(newWeight) || newWeight &lt;= 0) {
                 alert('Peso inválido!');
                 return;
             }
@@ -789,7 +813,7 @@
             }
             
             const weight = prompt('Peso (kg):');
-            if (!weight || isNaN(weight) || parseFloat(weight) <= 0) {
+            if (!weight || isNaN(weight) || parseFloat(weight) &lt;= 0) {
                 alert('Peso inválido!');
                 return;
             }
