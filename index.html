@@ -40,31 +40,18 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
         h1 {
             text-align: center;
             color: var(--text-color);
-        }
-
-        #controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        button {
-            padding: 10px 20px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #0056b3;
+            margin: 0;
+            flex: 1;
         }
 
         #theme-toggle {
@@ -81,6 +68,7 @@
             align-items: center;
             justify-content: center;
             transition: background 0.3s;
+            flex-shrink: 0;
         }
 
         #theme-toggle:hover {
@@ -93,6 +81,27 @@
 
         body.dark-mode #theme-toggle:hover {
             background: #5568b8;
+        }
+
+        #controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
         }
 
         #fighters {
@@ -236,6 +245,11 @@
         }
 
         @media (max-width: 600px) {
+            .header-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+
             #controls {
                 flex-direction: column;
                 align-items: center;
@@ -250,12 +264,14 @@
     </style>
 </head>
 <body>
-    <h1>Judo Aguaí</h1>
+    <div class="header-container">
+        <h1>Judo Aguaí</h1>
+        <button id="theme-toggle" onclick="toggleTheme()" title="Alternar tema">☀️</button>
+    </div>
     <div id="controls">
         <button onclick="importData()">Importar</button>
         <button onclick="exportData()">Exportar</button>
         <button onclick="newFighter()">+ Novo Lutador</button>
-        <button id="theme-toggle" onclick="toggleTheme()" title="Alternar tema">☀️</button>
     </div>
     <div id="fighters"></div>
     <div id="modal" class="modal" onclick="if(event.target.id === 'modal') closeModal()">
