@@ -11,7 +11,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Judo Aguaí</title>
-     <style>
+      <style>
         :root {
             --bg-color: #f4f4f4;
             --text-color: #333;
@@ -272,6 +272,10 @@
             flex: 1;
             min-width: 150px;
         }
+        .edit-info-container > div:first-child {
+            flex-basis: 100%;
+            width: 100%;
+        }
         @media (max-width: 600px) {
             .edit-info-container {
                 flex-direction: column;
@@ -280,6 +284,9 @@
             .edit-info-container > div {
                 width: 100%;
                 min-width: auto;
+            }
+            .edit-info-container > div:first-child {
+                flex-basis: 100%;
             }
             #details input[type="text"],
             #details input[type="number"] {
@@ -334,7 +341,7 @@
     </div>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW erro:', err));
+            navigator.serviceWorker.register('service-worker.js').catch(err => console.log('SW erro:', err));
         }
         function getBeltImagePath(beltFileName) {
             return `./Faixas/Faixa_${beltFileName}.svg`;
