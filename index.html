@@ -12,23 +12,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Judo Aguaí</title>
     <style>
+        :root {
+            --bg-color: #f4f4f4;
+            --text-color: #333;
+            --card-bg: #FFFFFF;
+            --modal-bg: #fefefe;
+            --border-color: #ddd;
+            --input-border: #ccc;
+        }
+
+        body.dark-mode {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --card-bg: #2d2d2d;
+            --modal-bg: #2d2d2d;
+            --border-color: #444;
+            --input-border: #555;
+        }
+
         body {
             font-family: Arial, sans-serif;
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f4f4f4;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
         }
+
         h1 {
             text-align: center;
-            color: #333;
+            color: var(--text-color);
         }
+
         #controls {
             display: flex;
             gap: 10px;
             justify-content: center;
             margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
         }
+
         button {
             padding: 10px 20px;
             background: #007bff;
@@ -37,14 +62,45 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
         button:hover {
             background: #0056b3;
         }
+
+        #theme-toggle {
+            padding: 10px 15px;
+            background: #ffc107;
+            color: #333;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+
+        #theme-toggle:hover {
+            background: #ffb300;
+        }
+
+        body.dark-mode #theme-toggle {
+            background: #667bc6;
+        }
+
+        body.dark-mode #theme-toggle:hover {
+            background: #5568b8;
+        }
+
         #fighters {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 15px;
         }
+
         .card {
             padding: 15px;
             border-radius: 10px;
@@ -57,19 +113,24 @@
             flex-direction: column;
             justify-content: center;
             position: relative;
+            background-color: var(--card-bg);
         }
+
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.3);
         }
+
         .card h3 {
             margin: 0 0 5px 0;
             font-size: 1em;
         }
+
         .card p {
             font-size: 0.9em;
             margin: 2px 0;
         }
+
         .delete-btn {
             position: absolute;
             bottom: 10px;
@@ -88,9 +149,11 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             transition: background-color 0.2s;
         }
+
         .delete-btn:hover {
             background-color: #c82333;
         }
+
         .modal {
             display: none;
             position: fixed;
@@ -102,68 +165,76 @@
             overflow: auto;
             background-color: rgba(0,0,0,0.5);
         }
-        .modal-content {
-			background-color: #fefefe;
-			margin: 5% auto;
-			padding: 20px;
-			border-radius: 10px;
-			width: 90%;
-			max-width: 900px;
-			max-height: 80vh;
-			overflow-y: auto;
-			position: relative;
-			box-sizing: border-box;
-		}
 
-		@media (max-width: 600px) {
-			#controls {
-				flex-direction: column;
-				align-items: center;
-			}
-			.modal-content {
-				width: 95%;
-				margin: 10% auto;
-				padding: 15px;
-				box-sizing: border-box;
-			}
-		}
-        .close {
-			position: absolute;
-			right: 15px;
-			top: 15px;
-			color: #aaa;
-			font-size: 28px;
-			font-weight: bold;
-			cursor: pointer;
-		}
-        .close:hover {
-            color: #000;
+        .modal-content {
+            background-color: var(--modal-bg);
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-sizing: border-box;
+            color: var(--text-color);
         }
+
+        .close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            color: var(--text-color);
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            opacity: 0.7;
+        }
+
         #details {
             margin-top: 20px;
         }
+
         #details details {
             margin: 10px 0;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 5px;
             padding: 5px;
+            background-color: var(--card-bg);
         }
+
         #details summary {
             font-weight: bold;
             cursor: pointer;
             padding: 5px;
+            color: var(--text-color);
         }
+
         #details ul {
             padding-left: 20px;
             margin: 10px 0;
         }
+
         #details li {
             list-style: none;
             padding: 5px 0;
+            color: var(--text-color);
         }
+
         #details input[type="checkbox"] {
             margin-right: 8px;
         }
+
+        #details input[type="text"],
+        #details input[type="number"] {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--input-border);
+        }
+
         @media (max-width: 600px) {
             #controls {
                 flex-direction: column;
@@ -172,6 +243,8 @@
             .modal-content {
                 width: 95%;
                 margin: 10% auto;
+                padding: 15px;
+                box-sizing: border-box;
             }
         }
     </style>
@@ -182,6 +255,7 @@
         <button onclick="importData()">Importar</button>
         <button onclick="exportData()">Exportar</button>
         <button onclick="newFighter()">+ Novo Lutador</button>
+        <button id="theme-toggle" onclick="toggleTheme()" title="Alternar tema">☀️</button>
     </div>
     <div id="fighters"></div>
     <div id="modal" class="modal" onclick="if(event.target.id === 'modal') closeModal()">
@@ -293,6 +367,27 @@
 
         let fighters = [];
 
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const themeBtn = document.getElementById('theme-toggle');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            themeBtn.textContent = isDarkMode ? '🌙' : '☀️';
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
+            updateThemeIcon();
+        }
+
         function getAthleteCategory(birthDateStr) {
             const parts = birthDateStr.split('/');
             const birthYear = parseInt(parts[2]);
@@ -327,7 +422,7 @@
             const container = document.getElementById('fighters');
             container.innerHTML = '';
             if (fighters.length === 0) {
-                container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #666;">Nenhum lutador. Adicione um novo!</p>';
+                container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: var(--text-color);">Nenhum lutador. Adicione um novo!</p>';
                 return;
             }
             fighters.forEach((f, index) => {
@@ -362,6 +457,17 @@
             }
         }
 
+        function maskDate(event) {
+            let value = event.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2);
+            }
+            if (value.length >= 5) {
+                value = value.substring(0, 5) + '/' + value.substring(5, 9);
+            }
+            event.target.value = value;
+        }
+
         function openModal(fighterIndex) {
             const fighter = fighters[fighterIndex];
             document.getElementById('modal-title').textContent = fighter.name;
@@ -375,20 +481,20 @@
             });
 
             let html = `
-                <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 5px; background: #f9f9f9;">
+                <div style="border: 1px solid var(--border-color); padding: 15px; margin-bottom: 20px; border-radius: 5px; background: var(--card-bg);">
                     <h4>Editar Informações</h4>
                     <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
                         <div style="flex: 1; min-width: 150px;">
                             <label>Nome:</label>
-                            <input type="text" id="edit-name" value="${fighter.name}" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                            <input type="text" id="edit-name" value="${fighter.name}" style="width: 100%; padding: 8px; border: 1px solid var(--input-border); border-radius: 4px; box-sizing: border-box;">
                         </div>
                         <div style="flex: 1; min-width: 150px;">
                             <label>Data Nasc. (DD/MM/YYYY):</label>
-                            <input type="text" id="edit-birthdate" value="${fighter.birthDate}" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                            <input type="text" id="edit-birthdate" value="${fighter.birthDate}" maxlength="10" oninput="maskDate(event)" style="width: 100%; padding: 8px; border: 1px solid var(--input-border); border-radius: 4px; box-sizing: border-box;">
                         </div>
                         <div style="flex: 0.5; min-width: 80px;">
                             <label>Peso (kg):</label>
-                            <input type="number" id="edit-weight" value="${fighter.weight}" step="0.1" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                            <input type="number" id="edit-weight" value="${fighter.weight}" step="0.1" style="width: 100%; padding: 8px; border: 1px solid var(--input-border); border-radius: 4px; box-sizing: border-box;">
                         </div>
                     </div>
                     <button onclick="saveFighterInfo(${fighterIndex})" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Salvar</button>
@@ -546,6 +652,7 @@
         }
 
         window.addEventListener('load', () => {
+            loadTheme();
             const saved = localStorage.getItem('judoFighters');
             if (saved) {
                 try {
