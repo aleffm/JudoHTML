@@ -112,6 +112,20 @@
 			max-height: 80vh;
 			overflow-y: auto;
 			position: relative;
+			box-sizing: border-box;
+		}
+
+		@media (max-width: 600px) {
+			#controls {
+				flex-direction: column;
+				align-items: center;
+			}
+			.modal-content {
+				width: 95%;
+				margin: 10% auto;
+				padding: 15px;
+				box-sizing: border-box;
+			}
 		}
         .close {
 			position: absolute;
