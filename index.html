@@ -98,21 +98,21 @@
             gap: 15px;
         }
         .card {
-            padding: 15px;
-            padding-top: 55px;
-            border-radius: 10px;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            transition: transform 0.2s, box-shadow 0.2s;
-            text-align: center;
-            height: 90px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            position: relative;
-            background-color: var(--card-bg);
-            color: var(--text-color);
-        }
+			padding: 10px;
+			padding-top: 45px;
+			border-radius: 10px;
+			cursor: pointer;
+			box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+			transition: transform 0.2s, box-shadow 0.2s;
+			text-align: center;
+			height: 70px;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			position: relative;
+			background-color: var(--card-bg);
+			color: var(--text-color);
+		}
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.3);
@@ -382,7 +382,9 @@
                 return;
             }
             container.innerHTML = '';
-            fighters.forEach((f, index) => {
+			const sortedFighters = fighters.slice().sort((a, b) => a.name.localeCompare(b.name));
+			sortedFighters.forEach((f, index) => {
+			const realIndex = fighters.indexOf(f);
                 const belt = belts[f.beltIndex || 0];
                 const beltFileName = getBeltFileName(f.beltIndex || 0);
                 const card = document.createElement('div');
