@@ -396,9 +396,9 @@
                     <h3>${f.name}</h3>
                     <p>Faixa: ${belt.name}</p>
                     <p>Aprendidos: ${f.learned ? f.learned.length : 0}/${techniques.length}</p>
-                    <button class="delete-btn" onclick="deleteFighter(${index})">🗑️</button>
+                    <button class="delete-btn" onclick="deleteFighter(${realIndex})">🗑️</button>
                 `;
-                card.onclick = (e) => { if (e.target.className !== 'delete-btn') openModal(index); };
+                card.onclick = (e) => { if (e.target.className !== 'delete-btn') openModal(realIndex); };
                 container.appendChild(card);
             });
         }
@@ -461,8 +461,6 @@
         }
         function saveFighterInfo(fighterIndex) {
             const newName = document.getElementById('edit-name').value.trim();
-            const newBirthDate = document.getElementById('edit-birthdate').value.trim();
-            const newWeight = parseFloat(document.getElementById('edit-weight').value);
             
             if (!newName) {
 				alert('Nome é obrigatório!');
